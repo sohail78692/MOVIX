@@ -297,8 +297,7 @@ export function VideoPlayer() {
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.8 }}
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
-                       w-20 h-20 rounded-full bg-primary-500/90 hover:bg-primary-500
+            className="absolute inset-0 m-auto w-20 h-20 rounded-full bg-primary-500/90 hover:bg-primary-500
                        flex items-center justify-center transition-all hover:scale-110
                        shadow-[0_0_40px_rgba(249,115,22,0.5)]"
             onClick={togglePlay}
