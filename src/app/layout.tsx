@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   keywords: ['media player', 'video player', 'audio player', 'VLC', 'MOVIX'],
   authors: [{ name: 'MOVIX' }],
   icons: {
-    icon: '/favicon.png',
+    icon: '/video.png',
   },
 };
 
