@@ -314,7 +314,6 @@ export function useKeyboardShortcuts(videoRef: React.RefObject<HTMLVideoElement 
       setPlaybackRate,
       showPlaylist,
       setShowPlaylist,
-      setShowSettings,
       setShowShortcuts,
       setShowMediaInfo,
       setShowEqualizer,
