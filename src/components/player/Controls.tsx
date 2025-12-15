@@ -177,6 +177,8 @@ export function Controls({ videoRef, containerRef }: ControlsProps) {
                 className="h-1.5 group-hover:h-2"
                 trackClassName="bg-white/30"
                 fillClassName="bg-primary-500"
+                videoRef={videoRef}
+                showThumbnail
               />
             </div>
 
