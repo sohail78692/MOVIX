@@ -2,6 +2,7 @@
 
 import React, { useRef, useState, useCallback, useEffect } from 'react';
 import { cn } from '@/utils/helpers';
+import { Chapter } from '@/types';
 
 interface SliderProps {
   value: number;
@@ -22,6 +23,7 @@ interface SliderProps {
   orientation?: 'horizontal' | 'vertical';
   videoRef?: React.RefObject<HTMLVideoElement | null>;
   showThumbnail?: boolean;
+  chapters?: Chapter[];
 }
 
 export function Slider({
@@ -42,6 +44,7 @@ export function Slider({
   orientation = 'horizontal',
   videoRef,
   showThumbnail = false,
+  chapters = [],
 }: SliderProps) {
   const sliderRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -233,6 +236,23 @@ export function Slider({
           isVertical ? { height: `${percentage}%` } : { width: `${percentage}%` }
         }
       />
+
+      {/* Chapter Markers */}
+      {chapters.length > 0 && !isVertical && (
+        <>
+          {chapters.map((chapter) => {
+            const chapterPercentage = ((chapter.time - min) / (max - min)) * 100;
+            return (
+              <div
+                key={chapter.id}
+                className="absolute w-0.5 h-3 bg-primary-400 rounded-full top-1/2 -translate-y-1/2 pointer-events-none"
+                style={{ left: `${chapterPercentage}%` }}
+                title={chapter.title}
+              />
+            );
+          })}
+        </>
+      )}
 
       {/* Thumb */}
       {showThumb && (

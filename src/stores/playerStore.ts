@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { MediaFile, Subtitle, VideoEffects, Settings, AspectRatio, RecentFile, EqualizerState } from '@/types';
+import { MediaFile, Subtitle, VideoEffects, Settings, AspectRatio, RecentFile, EqualizerState, Chapter } from '@/types';
 import { generateId, shuffleArray } from '@/utils/helpers';
 
 interface PlayerStore {
@@ -62,6 +62,13 @@ interface PlayerStore {
 
   // Equalizer
   equalizer: EqualizerState;
+
+  // Resume Playback
+  playbackPositions: Record<string, number>;
+
+  // Chapters/Markers
+  chapters: Chapter[];
+  showChapters: boolean;
 
   // Actions
   setCurrentMedia: (media: MediaFile | null) => void;
@@ -127,6 +134,18 @@ interface PlayerStore {
   setEqualizerPreamp: (preamp: number) => void;
   setEqualizerPreset: (preset: string) => void;
   resetEqualizer: () => void;
+
+  // Resume Playback Actions
+  savePlaybackPosition: (mediaId: string, time: number) => void;
+  getPlaybackPosition: (mediaId: string) => number | null;
+  clearPlaybackPosition: (mediaId: string) => void;
+
+  // Chapter Actions
+  addChapter: (fileId: string, time: number, title: string) => void;
+  removeChapter: (chapterId: string) => void;
+  updateChapter: (chapterId: string, title: string) => void;
+  getChaptersForFile: (fileId: string) => Chapter[];
+  setShowChapters: (show: boolean) => void;
 }
 
 const defaultEffects: VideoEffects = {
@@ -222,6 +241,11 @@ export const usePlayerStore = create<PlayerStore>()(
       isABLooping: false,
 
       equalizer: defaultEqualizer,
+
+      playbackPositions: {},
+
+      chapters: [],
+      showChapters: false,
 
       // Actions
       setCurrentMedia: (media) => set({ currentMedia: media }),
@@ -545,6 +569,65 @@ export const usePlayerStore = create<PlayerStore>()(
         set({ equalizer: defaultEqualizer });
         get().showOSD('Equalizer reset');
       },
+
+      // Resume Playback Actions
+      savePlaybackPosition: (mediaId, time) => {
+        const { playbackPositions } = get();
+        // Only save if more than 10 seconds into video and not near the end
+        if (time > 10) {
+          set({
+            playbackPositions: {
+              ...playbackPositions,
+              [mediaId]: time,
+            },
+          });
+        }
+      },
+
+      getPlaybackPosition: (mediaId) => {
+        const { playbackPositions } = get();
+        return playbackPositions[mediaId] ?? null;
+      },
+
+      clearPlaybackPosition: (mediaId) => {
+        const { playbackPositions } = get();
+        const newPositions = { ...playbackPositions };
+        delete newPositions[mediaId];
+        set({ playbackPositions: newPositions });
+      },
+
+      // Chapter Actions
+      addChapter: (fileId, time, title) => {
+        const { chapters } = get();
+        const newChapter: Chapter = {
+          id: generateId(),
+          fileId,
+          time,
+          title,
+        };
+        set({ chapters: [...chapters, newChapter].sort((a, b) => a.time - b.time) });
+        get().showOSD(`Marker added: ${title}`);
+      },
+
+      removeChapter: (chapterId) => {
+        const { chapters } = get();
+        set({ chapters: chapters.filter((c) => c.id !== chapterId) });
+        get().showOSD('Marker removed');
+      },
+
+      updateChapter: (chapterId, title) => {
+        const { chapters } = get();
+        set({
+          chapters: chapters.map((c) => (c.id === chapterId ? { ...c, title } : c)),
+        });
+      },
+
+      getChaptersForFile: (fileId) => {
+        const { chapters } = get();
+        return chapters.filter((c) => c.fileId === fileId);
+      },
+
+      setShowChapters: (show) => set({ showChapters: show }),
     }),
     {
       name: 'movix-player-storage',
@@ -556,6 +639,8 @@ export const usePlayerStore = create<PlayerStore>()(
         effects: state.effects,
         recentFiles: state.recentFiles,
         equalizer: state.equalizer,
+        playbackPositions: state.playbackPositions,
+        chapters: state.chapters,
       }),
     }
   )

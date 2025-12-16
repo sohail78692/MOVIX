@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useRef } from 'react';
 import { usePlayerStore } from '@/stores/playerStore';
+import { formatTime } from '@/utils/helpers';
 
 export function useKeyboardShortcuts(videoRef: React.RefObject<HTMLVideoElement | null>) {
   const {
@@ -33,7 +34,14 @@ export function useKeyboardShortcuts(videoRef: React.RefObject<HTMLVideoElement 
     toggleABLoop,
     setShowEqualizer,
     showEqualizer,
+    addChapter,
+    currentTime,
+    duration,
   } = usePlayerStore();
+
+  // Refs for speed gesture (press-and-hold)
+  const originalSpeedRef = useRef<number>(1);
+  const isHoldingSpeedRef = useRef<boolean>(false);
 
   const togglePlay = useCallback(() => {
     if (!videoRef.current || !currentMedia) return;
@@ -73,6 +81,54 @@ export function useKeyboardShortcuts(videoRef: React.RefObject<HTMLVideoElement 
       setFullscreen(false);
     }
   }, [setFullscreen]);
+
+  // Frame-by-frame navigation (assumes ~30fps)
+  const frameStep = useCallback(
+    (forward: boolean) => {
+      if (!videoRef.current) return;
+      const video = videoRef.current;
+
+      // Pause video for frame stepping
+      if (!video.paused) {
+        video.pause();
+      }
+
+      const frameTime = 1 / 30; // ~33ms per frame
+      const newTime = forward
+        ? Math.min(video.currentTime + frameTime, video.duration)
+        : Math.max(video.currentTime - frameTime, 0);
+
+      video.currentTime = newTime;
+      showOSD(`Frame: ${formatTime(newTime)}`);
+    },
+    [videoRef, showOSD]
+  );
+
+  // Speed gesture handlers
+  const startSpeedGesture = useCallback(
+    (fast: boolean) => {
+      if (!videoRef.current || isHoldingSpeedRef.current) return;
+
+      isHoldingSpeedRef.current = true;
+      originalSpeedRef.current = playbackRate;
+
+      const newRate = fast ? 2 : 0.5;
+      setPlaybackRate(newRate);
+      if (videoRef.current) videoRef.current.playbackRate = newRate;
+      showOSD(`Speed: ${newRate}x (hold)`);
+    },
+    [videoRef, playbackRate, setPlaybackRate, showOSD]
+  );
+
+  const endSpeedGesture = useCallback(() => {
+    if (!isHoldingSpeedRef.current) return;
+
+    isHoldingSpeedRef.current = false;
+    const originalRate = originalSpeedRef.current;
+    setPlaybackRate(originalRate);
+    if (videoRef.current) videoRef.current.playbackRate = originalRate;
+    showOSD(`Speed: ${originalRate}x`);
+  }, [videoRef, setPlaybackRate, showOSD]);
 
   const takeScreenshot = useCallback(() => {
     const video = videoRef.current;
@@ -133,12 +189,22 @@ export function useKeyboardShortcuts(videoRef: React.RefObject<HTMLVideoElement 
 
         case 'arrowleft':
           e.preventDefault();
-          seek(shift ? -60 : -settings.seekDuration);
+          if (ctrl) {
+            // Hold Ctrl+Left for slow motion
+            startSpeedGesture(false);
+          } else {
+            seek(shift ? -60 : -settings.seekDuration);
+          }
           break;
 
         case 'arrowright':
           e.preventDefault();
-          seek(shift ? 60 : settings.seekDuration);
+          if (ctrl) {
+            // Hold Ctrl+Right for fast forward
+            startSpeedGesture(true);
+          } else {
+            seek(shift ? 60 : settings.seekDuration);
+          }
           break;
 
         case 'j':
@@ -195,15 +261,9 @@ export function useKeyboardShortcuts(videoRef: React.RefObject<HTMLVideoElement 
           adjustVolume(-settings.volumeStep / 100);
           break;
 
-        case 'm':
-          toggleMute();
-          showOSD(volume === 0 ? 'Unmuted' : 'Muted');
-          break;
-
-        // Speed
+        // Speed (Shift + > or <)
         case '>':
-        case '.':
-          if (shift || e.key === '>') {
+          if (shift) {
             const newRate = Math.min(playbackRate + 0.25, 4);
             setPlaybackRate(newRate);
             if (videoRef.current) videoRef.current.playbackRate = newRate;
@@ -212,12 +272,38 @@ export function useKeyboardShortcuts(videoRef: React.RefObject<HTMLVideoElement 
           break;
 
         case '<':
-        case ',':
-          if (shift || e.key === '<') {
+          if (shift) {
             const newRate = Math.max(playbackRate - 0.25, 0.25);
             setPlaybackRate(newRate);
             if (videoRef.current) videoRef.current.playbackRate = newRate;
             showOSD(`Speed: ${newRate}x`);
+          }
+          break;
+
+        // Frame-by-frame navigation (. and ,)
+        case '.':
+          if (!shift) {
+            e.preventDefault();
+            frameStep(true); // Forward
+          }
+          break;
+
+        case ',':
+          if (!shift) {
+            e.preventDefault();
+            frameStep(false); // Backward
+          }
+          break;
+
+        // Add marker at current position
+        case 'm':
+          if (ctrl && currentMedia) {
+            e.preventDefault();
+            const markerNum = usePlayerStore.getState().chapters.filter(c => c.fileId === currentMedia.id).length + 1;
+            addChapter(currentMedia.id, currentTime, `Marker ${markerNum}`);
+          } else if (!ctrl) {
+            toggleMute();
+            showOSD(volume === 0 ? 'Unmuted' : 'Muted');
           }
           break;
 
@@ -310,6 +396,8 @@ export function useKeyboardShortcuts(videoRef: React.RefObject<HTMLVideoElement 
       playPrevious,
       toggleFullscreen,
       takeScreenshot,
+      frameStep,
+      startSpeedGesture,
       playbackRate,
       setPlaybackRate,
       showPlaylist,
@@ -325,13 +413,41 @@ export function useKeyboardShortcuts(videoRef: React.RefObject<HTMLVideoElement 
       showOSD,
       volume,
       videoRef,
+      currentMedia,
+      addChapter,
+      currentTime,
     ]
+  );
+
+  // Handle key up for speed gesture release
+  const handleKeyUp = useCallback(
+    (e: KeyboardEvent) => {
+      const ctrl = e.ctrlKey || e.metaKey;
+
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+        if (isHoldingSpeedRef.current) {
+          endSpeedGesture();
+        }
+      }
+
+      // Also end if Ctrl is released while holding
+      if (e.key === 'Control' || e.key === 'Meta') {
+        if (isHoldingSpeedRef.current) {
+          endSpeedGesture();
+        }
+      }
+    },
+    [endSpeedGesture]
   );
 
   useEffect(() => {
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [handleKeyDown]);
+    window.addEventListener('keyup', handleKeyUp);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+    };
+  }, [handleKeyDown, handleKeyUp]);
 
   useEffect(() => {
     const handleFullscreenChange = () => {
@@ -348,5 +464,6 @@ export function useKeyboardShortcuts(videoRef: React.RefObject<HTMLVideoElement 
     adjustVolume,
     toggleFullscreen,
     takeScreenshot,
+    frameStep,
   };
 }

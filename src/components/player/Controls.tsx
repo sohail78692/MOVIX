@@ -23,6 +23,7 @@ import {
   Clock,
   Camera,
   SlidersHorizontal,
+  Bookmark,
 } from 'lucide-react';
 import { usePlayerStore } from '@/stores/playerStore';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
@@ -74,6 +75,8 @@ export function Controls({ videoRef, containerRef }: ControlsProps) {
     toggleABLoop,
     equalizer,
     setShowEqualizer,
+    setShowChapters,
+    chapters,
   } = usePlayerStore();
 
   const { togglePlay, toggleFullscreen } = useKeyboardShortcuts(videoRef);
@@ -179,6 +182,7 @@ export function Controls({ videoRef, containerRef }: ControlsProps) {
                 fillClassName="bg-primary-500"
                 videoRef={videoRef}
                 showThumbnail
+                chapters={currentMedia ? chapters.filter(c => c.fileId === currentMedia.id) : []}
               />
             </div>
 
@@ -418,6 +422,19 @@ export function Controls({ videoRef, containerRef }: ControlsProps) {
                     )}
                   >
                     <ListMusic className="w-5 h-5" />
+                  </button>
+                </Tooltip>
+
+                {/* Chapters/Markers */}
+                <Tooltip content="Chapters (Ctrl+M)">
+                  <button
+                    onClick={() => setShowChapters(true)}
+                    className={cn(
+                      'p-2 rounded-lg hover:bg-white/10 transition-colors',
+                      currentMedia && chapters.filter(c => c.fileId === currentMedia.id).length > 0 && 'text-primary-500'
+                    )}
+                  >
+                    <Bookmark className="w-5 h-5" />
                   </button>
                 </Tooltip>
 

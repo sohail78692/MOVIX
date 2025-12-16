@@ -98,3 +98,10 @@ export interface EqualizerState {
   preamp: number;
   preset: string;
 }
+
+export interface Chapter {
+  id: string;
+  fileId: string;
+  time: number;
+  title: string;
+}

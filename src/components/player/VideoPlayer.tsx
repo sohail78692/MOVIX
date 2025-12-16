@@ -45,7 +45,15 @@ export function VideoPlayer() {
     loopPointA,
     loopPointB,
     isABLooping,
+    savePlaybackPosition,
+    getPlaybackPosition,
+    clearPlaybackPosition,
+    showOSD,
   } = usePlayerStore();
+
+  // Refs for resume playback
+  const lastSaveTimeRef = useRef<number>(0);
+  const hasResumedRef = useRef<boolean>(false);
 
   const { togglePlay, toggleFullscreen } = useKeyboardShortcuts(videoRef);
 
@@ -79,6 +87,15 @@ export function VideoPlayer() {
         );
         setCurrentSubtitle(currentSub);
       }
+
+      // Save playback position periodically (every 5 seconds)
+      if (settings.rememberPosition && currentMedia) {
+        const now = Date.now();
+        if (now - lastSaveTimeRef.current > 5000) {
+          lastSaveTimeRef.current = now;
+          savePlaybackPosition(currentMedia.id, video.currentTime);
+        }
+      }
     };
 
     const handleProgress = () => {
@@ -91,6 +108,10 @@ export function VideoPlayer() {
     const handlePlay = () => setIsPlaying(true);
     const handlePause = () => setIsPlaying(false);
     const handleEnded = () => {
+      // Clear saved position when video completes
+      if (currentMedia) {
+        clearPlaybackPosition(currentMedia.id);
+      }
       if (!isLooping) {
         playNext();
       }
@@ -111,7 +132,7 @@ export function VideoPlayer() {
       video.removeEventListener('pause', handlePause);
       video.removeEventListener('ended', handleEnded);
     };
-  }, [setCurrentTime, setDuration, setBuffered, setIsPlaying, subtitles, subtitleDelay, setCurrentSubtitle, isLooping, playNext, isABLooping, loopPointA, loopPointB]);
+  }, [setCurrentTime, setDuration, setBuffered, setIsPlaying, subtitles, subtitleDelay, setCurrentSubtitle, isLooping, playNext, isABLooping, loopPointA, loopPointB, settings.rememberPosition, currentMedia, savePlaybackPosition, clearPlaybackPosition]);
 
   // Sync video state with store
   useEffect(() => {
@@ -140,15 +161,38 @@ export function VideoPlayer() {
     const video = videoRef.current;
     if (!video || !currentMedia) return;
 
+    // Reset resume flag for new media
+    hasResumedRef.current = false;
+
     video.src = currentMedia.url;
     video.load();
 
-    if (settings.autoPlay) {
-      video.play().catch(() => {
-        // Autoplay was prevented
-      });
-    }
-  }, [currentMedia, settings.autoPlay]);
+    // Resume playback position once video is ready
+    const handleCanPlay = () => {
+      if (settings.rememberPosition && !hasResumedRef.current) {
+        const savedPosition = getPlaybackPosition(currentMedia.id);
+        if (savedPosition && savedPosition > 10 && savedPosition < video.duration - 10) {
+          video.currentTime = savedPosition;
+          hasResumedRef.current = true;
+          showOSD(`Resuming from ${Math.floor(savedPosition / 60)}:${String(Math.floor(savedPosition % 60)).padStart(2, '0')}`);
+        }
+      }
+
+      if (settings.autoPlay) {
+        video.play().catch(() => {
+          // Autoplay was prevented
+        });
+      }
+
+      video.removeEventListener('canplay', handleCanPlay);
+    };
+
+    video.addEventListener('canplay', handleCanPlay);
+
+    return () => {
+      video.removeEventListener('canplay', handleCanPlay);
+    };
+  }, [currentMedia, settings.autoPlay, settings.rememberPosition, getPlaybackPosition, showOSD]);
 
   // Controls visibility
   const showControls = useCallback(() => {

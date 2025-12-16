@@ -7,6 +7,7 @@ import { ShortcutsModal } from '@/components/modals/ShortcutsModal';
 import { MediaInfoModal } from '@/components/modals/MediaInfoModal';
 import { RecentFilesModal } from '@/components/modals/RecentFilesModal';
 import { EqualizerModal } from '@/components/modals/EqualizerModal';
+import { ChaptersModal } from '@/components/modals/ChaptersModal';
 
 export default function Home() {
   return (
@@ -23,6 +24,7 @@ export default function Home() {
       <MediaInfoModal />
       <RecentFilesModal />
       <EqualizerModal />
+      <ChaptersModal />
     </main>
   );
 }
