@@ -35,8 +35,10 @@ const shortcuts = [
   {
     category: 'Speed',
     items: [
-      { key: '> / .', action: 'Increase speed' },
-      { key: '< / ,', action: 'Decrease speed' },
+      { key: 'Shift + >', action: 'Increase speed' },
+      { key: 'Shift + <', action: 'Decrease speed' },
+      { key: 'Ctrl + →', action: 'Hold for 2x speed' },
+      { key: 'Ctrl + ←', action: 'Hold for 0.5x speed' },
     ],
   },
   {
@@ -55,6 +57,19 @@ const shortcuts = [
       { key: 'C', action: 'Toggle subtitles' },
       { key: 'G', action: 'Subtitle delay -50ms' },
       { key: 'H', action: 'Subtitle delay +50ms' },
+    ],
+  },
+  {
+    category: 'Advanced',
+    items: [
+      { key: 'S', action: 'Take screenshot' },
+      { key: 'B', action: 'A-B Loop toggle' },
+      { key: 'E', action: 'Open equalizer' },
+      { key: 'A', action: 'Audio tracks' },
+      { key: 'T', action: 'Sleep timer' },
+      { key: 'Ctrl + M', action: 'Add marker/chapter' },
+      { key: ',', action: 'Previous frame' },
+      { key: '.', action: 'Next frame' },
     ],
   },
 ];

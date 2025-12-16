@@ -24,6 +24,8 @@ import {
   Camera,
   SlidersHorizontal,
   Bookmark,
+  Music2,
+  Timer,
 } from 'lucide-react';
 import { usePlayerStore } from '@/stores/playerStore';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
@@ -77,6 +79,10 @@ export function Controls({ videoRef, containerRef }: ControlsProps) {
     setShowEqualizer,
     setShowChapters,
     chapters,
+    audioTracks,
+    setShowAudioTracks,
+    setShowSleepTimer,
+    sleepTimerEndTime,
   } = usePlayerStore();
 
   const { togglePlay, toggleFullscreen } = useKeyboardShortcuts(videoRef);
@@ -448,6 +454,32 @@ export function Controls({ videoRef, containerRef }: ControlsProps) {
                     )}
                   >
                     <SlidersHorizontal className="w-5 h-5" />
+                  </button>
+                </Tooltip>
+
+                {/* Audio Tracks */}
+                <Tooltip content="Audio Tracks (A)">
+                  <button
+                    onClick={() => setShowAudioTracks(true)}
+                    className={cn(
+                      'p-2 rounded-lg hover:bg-white/10 transition-colors',
+                      audioTracks.length > 1 && 'text-primary-500'
+                    )}
+                  >
+                    <Music2 className="w-5 h-5" />
+                  </button>
+                </Tooltip>
+
+                {/* Sleep Timer */}
+                <Tooltip content="Sleep Timer (T)">
+                  <button
+                    onClick={() => setShowSleepTimer(true)}
+                    className={cn(
+                      'p-2 rounded-lg hover:bg-white/10 transition-colors',
+                      sleepTimerEndTime !== null && 'text-primary-500'
+                    )}
+                  >
+                    <Timer className="w-5 h-5" />
                   </button>
                 </Tooltip>
 

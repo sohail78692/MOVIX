@@ -49,6 +49,10 @@ export function VideoPlayer() {
     getPlaybackPosition,
     clearPlaybackPosition,
     showOSD,
+    setAudioTracks,
+    selectedAudioTrack,
+    sleepTimerEndTime,
+    clearSleepTimer,
   } = usePlayerStore();
 
   // Refs for resume playback
@@ -167,6 +171,23 @@ export function VideoPlayer() {
     video.src = currentMedia.url;
     video.load();
 
+    // Detect audio tracks
+    const handleLoadedMetadata = () => {
+      // Note: audioTracks API is not universally supported
+      // It works in Chrome/Edge but not in Firefox/Safari
+      const videoElement = video as any;
+      if (videoElement.audioTracks && videoElement.audioTracks.length > 0) {
+        const tracks = Array.from(videoElement.audioTracks).map((track: any, index: number) => ({
+          id: index,
+          label: track.label || `Audio Track ${index + 1}`,
+          language: track.language || undefined,
+        }));
+        setAudioTracks(tracks);
+      } else {
+        setAudioTracks([]);
+      }
+    };
+
     // Resume playback position once video is ready
     const handleCanPlay = () => {
       if (settings.rememberPosition && !hasResumedRef.current) {
@@ -187,12 +208,48 @@ export function VideoPlayer() {
       video.removeEventListener('canplay', handleCanPlay);
     };
 
+    video.addEventListener('loadedmetadata', handleLoadedMetadata);
     video.addEventListener('canplay', handleCanPlay);
 
     return () => {
+      video.removeEventListener('loadedmetadata', handleLoadedMetadata);
       video.removeEventListener('canplay', handleCanPlay);
     };
-  }, [currentMedia, settings.autoPlay, settings.rememberPosition, getPlaybackPosition, showOSD]);
+  }, [currentMedia, settings.autoPlay, settings.rememberPosition, getPlaybackPosition, showOSD, setAudioTracks]);
+
+  // Audio track switching
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const videoElement = video as any;
+    if (!videoElement.audioTracks || videoElement.audioTracks.length === 0) return;
+
+    // Enable the selected track and disable others
+    Array.from(videoElement.audioTracks).forEach((track: any, index: number) => {
+      track.enabled = index === selectedAudioTrack;
+    });
+  }, [selectedAudioTrack]);
+
+  // Sleep timer
+  useEffect(() => {
+    if (!sleepTimerEndTime || !videoRef.current) return;
+
+    const checkTimer = setInterval(() => {
+      const now = Date.now();
+      if (now >= sleepTimerEndTime) {
+        // Pause the video
+        if (videoRef.current && isPlaying) {
+          videoRef.current.pause();
+          showOSD('Sleep timer expired - Paused');
+        }
+        clearSleepTimer();
+        clearInterval(checkTimer);
+      }
+    }, 1000);
+
+    return () => clearInterval(checkTimer);
+  }, [sleepTimerEndTime, isPlaying, clearSleepTimer, showOSD]);
 
   // Controls visibility
   const showControls = useCallback(() => {

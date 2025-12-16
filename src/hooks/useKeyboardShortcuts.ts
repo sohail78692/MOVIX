@@ -37,6 +37,8 @@ export function useKeyboardShortcuts(videoRef: React.RefObject<HTMLVideoElement 
     addChapter,
     currentTime,
     duration,
+    setShowAudioTracks,
+    setShowSleepTimer,
   } = usePlayerStore();
 
   // Refs for speed gesture (press-and-hold)
@@ -242,6 +244,14 @@ export function useKeyboardShortcuts(videoRef: React.RefObject<HTMLVideoElement 
           setShowEqualizer(!showEqualizer);
           break;
 
+        case 'a':
+          setShowAudioTracks(true);
+          break;
+
+        case 't':
+          setShowSleepTimer(true);
+          break;
+
         case 's':
           if (shift) {
             toggleShuffle();
@@ -416,6 +426,8 @@ export function useKeyboardShortcuts(videoRef: React.RefObject<HTMLVideoElement 
       currentMedia,
       addChapter,
       currentTime,
+      setShowAudioTracks,
+      setShowSleepTimer,
     ]
   );
 

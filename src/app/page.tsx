@@ -8,6 +8,8 @@ import { MediaInfoModal } from '@/components/modals/MediaInfoModal';
 import { RecentFilesModal } from '@/components/modals/RecentFilesModal';
 import { EqualizerModal } from '@/components/modals/EqualizerModal';
 import { ChaptersModal } from '@/components/modals/ChaptersModal';
+import { AudioTracksModal } from '@/components/modals/AudioTracksModal';
+import { SleepTimerModal } from '@/components/modals/SleepTimerModal';
 
 export default function Home() {
   return (
@@ -25,6 +27,8 @@ export default function Home() {
       <RecentFilesModal />
       <EqualizerModal />
       <ChaptersModal />
+      <AudioTracksModal />
+      <SleepTimerModal />
     </main>
   );
 }

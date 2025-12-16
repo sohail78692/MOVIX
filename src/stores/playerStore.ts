@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { MediaFile, Subtitle, VideoEffects, Settings, AspectRatio, RecentFile, EqualizerState, Chapter } from '@/types';
+import { MediaFile, Subtitle, VideoEffects, Settings, AspectRatio, RecentFile, EqualizerState, Chapter, AudioTrack } from '@/types';
 import { generateId, shuffleArray } from '@/utils/helpers';
 
 interface PlayerStore {
@@ -39,6 +39,9 @@ interface PlayerStore {
 
   // Audio
   audioDelay: number;
+  audioTracks: AudioTrack[];
+  selectedAudioTrack: number;
+  showAudioTracks: boolean;
 
   // Video effects
   effects: VideoEffects;
@@ -69,6 +72,11 @@ interface PlayerStore {
   // Chapters/Markers
   chapters: Chapter[];
   showChapters: boolean;
+
+  // Sleep Timer
+  sleepTimerMinutes: number | null;
+  sleepTimerEndTime: number | null;
+  showSleepTimer: boolean;
 
   // Actions
   setCurrentMedia: (media: MediaFile | null) => void;
@@ -146,6 +154,16 @@ interface PlayerStore {
   updateChapter: (chapterId: string, title: string) => void;
   getChaptersForFile: (fileId: string) => Chapter[];
   setShowChapters: (show: boolean) => void;
+
+  // Audio Track Actions
+  setAudioTracks: (tracks: AudioTrack[]) => void;
+  setSelectedAudioTrack: (trackId: number) => void;
+  setShowAudioTracks: (show: boolean) => void;
+
+  // Sleep Timer Actions
+  setSleepTimer: (minutes: number | null) => void;
+  clearSleepTimer: () => void;
+  setShowSleepTimer: (show: boolean) => void;
 }
 
 const defaultEffects: VideoEffects = {
@@ -246,6 +264,14 @@ export const usePlayerStore = create<PlayerStore>()(
 
       chapters: [],
       showChapters: false,
+
+      audioTracks: [],
+      selectedAudioTrack: 0,
+      showAudioTracks: false,
+
+      sleepTimerMinutes: null,
+      sleepTimerEndTime: null,
+      showSleepTimer: false,
 
       // Actions
       setCurrentMedia: (media) => set({ currentMedia: media }),
@@ -628,6 +654,34 @@ export const usePlayerStore = create<PlayerStore>()(
       },
 
       setShowChapters: (show) => set({ showChapters: show }),
+
+      // Audio Track Actions
+      setAudioTracks: (tracks) => set({ audioTracks: tracks }),
+      setSelectedAudioTrack: (trackId) => {
+        set({ selectedAudioTrack: trackId });
+        const track = get().audioTracks.find((t) => t.id === trackId);
+        if (track) {
+          get().showOSD(`Audio: ${track.label}`);
+        }
+      },
+      setShowAudioTracks: (show) => set({ showAudioTracks: show }),
+
+      // Sleep Timer Actions
+      setSleepTimer: (minutes) => {
+        if (minutes === null) {
+          set({ sleepTimerMinutes: null, sleepTimerEndTime: null });
+          get().showOSD('Sleep timer cleared');
+        } else {
+          const endTime = Date.now() + minutes * 60 * 1000;
+          set({ sleepTimerMinutes: minutes, sleepTimerEndTime: endTime });
+          get().showOSD(`Sleep timer set: ${minutes} min`);
+        }
+      },
+      clearSleepTimer: () => {
+        set({ sleepTimerMinutes: null, sleepTimerEndTime: null });
+        get().showOSD('Sleep timer cleared');
+      },
+      setShowSleepTimer: (show) => set({ showSleepTimer: show }),
     }),
     {
       name: 'movix-player-storage',
