@@ -59,6 +59,10 @@ export function VideoPlayer() {
   const lastSaveTimeRef = useRef<number>(0);
   const hasResumedRef = useRef<boolean>(false);
 
+  // Refs for gesture handling
+  const lastTapTimeRef = useRef<number>(0);
+  const tapTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
   const { togglePlay, toggleFullscreen } = useKeyboardShortcuts(videoRef);
 
   // Initialize audio equalizer
@@ -361,9 +365,58 @@ export function VideoPlayer() {
         ref={videoRef}
         className="w-full h-full"
         style={videoStyle}
-        onClick={togglePlay}
-        onDoubleClick={toggleFullscreen}
         playsInline
+      />
+
+      {/* Gesture Overlay for Mobile/Desktop Seeking */}
+      <div
+        className="absolute inset-0 z-10"
+        onClick={(e) => {
+          e.preventDefault();
+          const now = Date.now();
+          const timeDiff = now - lastTapTimeRef.current;
+          const rect = e.currentTarget.getBoundingClientRect();
+          const x = e.clientX - rect.left;
+          const width = rect.width;
+          const percentage = x / width;
+
+          if (timeDiff < 300) {
+            // Double tap detected
+            if (tapTimeoutRef.current) {
+              clearTimeout(tapTimeoutRef.current);
+              tapTimeoutRef.current = null;
+            }
+
+            if (percentage < 0.3) {
+              // Left side double tap - Seek backward
+              if (videoRef.current) {
+                videoRef.current.currentTime = Math.max(0, videoRef.current.currentTime - 10);
+                showOSD('Rewind 10s');
+              }
+            } else if (percentage > 0.7) {
+              // Right side double tap - Seek forward
+              if (videoRef.current) {
+                videoRef.current.currentTime = Math.min(videoRef.current.duration, videoRef.current.currentTime + 10);
+                showOSD('Forward 10s');
+              }
+            } else {
+              // Center double tap - Toggle Fullscreen
+              toggleFullscreen();
+            }
+          } else {
+            // Single tap candidate
+            tapTimeoutRef.current = setTimeout(() => {
+              // Single tap anywhere toggles play, or restrict to center if desired.
+              // Taking "click in very middle just pause" literally, but assuming toggle is better.
+              togglePlay();
+              // Also show controls on interaction
+              setControlsVisible(true);
+            }, 300);
+          }
+
+          lastTapTimeRef.current = now;
+        }}
+        onDoubleClick={(e) => e.preventDefault()} // Prevent default double click behavior
       />
 
       {/* Subtitles */}
@@ -400,7 +453,7 @@ export function VideoPlayer() {
             exit={{ opacity: 0, scale: 0.8 }}
             className="absolute inset-0 m-auto w-20 h-20 rounded-full bg-primary-500/90 hover:bg-primary-500
                        flex items-center justify-center transition-all hover:scale-110
-                       shadow-[0_0_40px_rgba(249,115,22,0.5)]"
+                       shadow-[0_0_40px_rgba(249,115,22,0.5)] z-20"
             onClick={togglePlay}
           >
             <Play className="w-10 h-10 text-white ml-1" fill="white" />

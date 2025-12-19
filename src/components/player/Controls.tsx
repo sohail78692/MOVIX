@@ -171,7 +171,7 @@ export function Controls({ videoRef, containerRef }: ControlsProps) {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
-          className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent pt-20"
+          className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent pt-20 z-20"
         >
           <div className="px-4 pb-4">
             {/* Progress Bar */}
@@ -295,7 +295,7 @@ export function Controls({ videoRef, containerRef }: ControlsProps) {
                 {/* Subtitles */}
                 <Tooltip content="Subtitles">
                   <button
-                    onClick={() => {}}
+                    onClick={() => { }}
                     className={cn(
                       'p-2 rounded-lg hover:bg-white/10 transition-colors',
                       subtitles.length > 0 && 'text-primary-500'
