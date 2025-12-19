@@ -28,7 +28,6 @@ import {
   Timer,
   Lock,
   Unlock,
-  RotateCw,
 } from 'lucide-react';
 import { usePlayerStore } from '@/stores/playerStore';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
@@ -159,20 +158,7 @@ export function Controls({ videoRef, containerRef }: ControlsProps) {
     }
   };
 
-  const toggleLandscape = async () => {
-    try {
-      if (!document.fullscreenElement && videoRef.current) {
-        await videoRef.current.requestFullscreen();
-      }
 
-      if (screen.orientation && (screen.orientation as any).lock) {
-        await (screen.orientation as any).lock('landscape');
-      }
-    } catch (err) {
-      console.error('Landscape error:', err);
-      // Fallback: just standard fullscreen which usually rotates handled by OS
-    }
-  };
 
   const getVolumeIcon = () => {
     if (isMuted || volume === 0) return VolumeX;
@@ -525,15 +511,7 @@ export function Controls({ videoRef, containerRef }: ControlsProps) {
                   </button>
                 </Tooltip>
 
-                {/* Landscape Mode */}
-                <Tooltip content="Landscape Mode">
-                  <button
-                    onClick={toggleLandscape}
-                    className="p-2 rounded-lg hover:bg-white/10 transition-colors"
-                  >
-                    <RotateCw className="w-5 h-5" />
-                  </button>
-                </Tooltip>
+
 
                 {/* Lock Screen */}
                 <Tooltip content="Lock Screen">
