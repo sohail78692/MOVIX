@@ -53,6 +53,7 @@ export function VideoPlayer() {
     selectedAudioTrack,
     sleepTimerEndTime,
     clearSleepTimer,
+    isLocked,
   } = usePlayerStore();
 
   // Refs for resume playback
@@ -374,6 +375,12 @@ export function VideoPlayer() {
           className="absolute inset-0 z-10"
           onClick={(e) => {
             e.preventDefault();
+
+            if (isLocked) {
+              setControlsVisible(true);
+              return;
+            }
+
             const now = Date.now();
             const timeDiff = now - lastTapTimeRef.current;
             const rect = e.currentTarget.getBoundingClientRect();

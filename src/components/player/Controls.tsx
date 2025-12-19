@@ -26,6 +26,9 @@ import {
   Bookmark,
   Music2,
   Timer,
+  Lock,
+  Unlock,
+  RotateCw,
 } from 'lucide-react';
 import { usePlayerStore } from '@/stores/playerStore';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
@@ -83,6 +86,8 @@ export function Controls({ videoRef, containerRef }: ControlsProps) {
     setShowAudioTracks,
     setShowSleepTimer,
     sleepTimerEndTime,
+    isLocked,
+    toggleLock,
   } = usePlayerStore();
 
   const { togglePlay, toggleFullscreen } = useKeyboardShortcuts(videoRef);
@@ -154,6 +159,21 @@ export function Controls({ videoRef, containerRef }: ControlsProps) {
     }
   };
 
+  const toggleLandscape = async () => {
+    try {
+      if (!document.fullscreenElement && videoRef.current) {
+        await videoRef.current.requestFullscreen();
+      }
+
+      if (screen.orientation && (screen.orientation as any).lock) {
+        await (screen.orientation as any).lock('landscape');
+      }
+    } catch (err) {
+      console.error('Landscape error:', err);
+      // Fallback: just standard fullscreen which usually rotates handled by OS
+    }
+  };
+
   const getVolumeIcon = () => {
     if (isMuted || volume === 0) return VolumeX;
     if (volume < 0.5) return Volume1;
@@ -162,6 +182,28 @@ export function Controls({ videoRef, containerRef }: ControlsProps) {
 
   const VolumeIcon = getVolumeIcon();
   const speeds = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
+
+  if (isLocked) {
+    return (
+      <AnimatePresence>
+        {(controlsVisible) && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute top-6 right-6 z-50"
+          >
+            <button
+              onClick={toggleLock}
+              className="p-3 rounded-full bg-white/10 backdrop-blur-md hover:bg-white/20 transition-colors border border-white/20"
+            >
+              <Lock className="w-6 h-6 text-primary-500" />
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    );
+  }
 
   return (
     <AnimatePresence>
@@ -480,6 +522,26 @@ export function Controls({ videoRef, containerRef }: ControlsProps) {
                     )}
                   >
                     <Timer className="w-5 h-5" />
+                  </button>
+                </Tooltip>
+
+                {/* Landscape Mode */}
+                <Tooltip content="Landscape Mode">
+                  <button
+                    onClick={toggleLandscape}
+                    className="p-2 rounded-lg hover:bg-white/10 transition-colors md:hidden"
+                  >
+                    <RotateCw className="w-5 h-5" />
+                  </button>
+                </Tooltip>
+
+                {/* Lock Screen */}
+                <Tooltip content="Lock Screen">
+                  <button
+                    onClick={toggleLock}
+                    className="p-2 rounded-lg hover:bg-white/10 transition-colors md:hidden"
+                  >
+                    <Unlock className="w-5 h-5" />
                   </button>
                 </Tooltip>
 

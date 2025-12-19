@@ -78,6 +78,9 @@ interface PlayerStore {
   sleepTimerEndTime: number | null;
   showSleepTimer: boolean;
 
+  // Screen Lock
+  isLocked: boolean;
+
   // Actions
   setCurrentMedia: (media: MediaFile | null) => void;
   addToPlaylist: (files: MediaFile[]) => void;
@@ -97,6 +100,7 @@ interface PlayerStore {
   setPlaybackRate: (rate: number) => void;
   toggleLoop: () => void;
   toggleShuffle: () => void;
+  toggleLock: () => void;
 
   setFullscreen: (fullscreen: boolean) => void;
   setPiP: (pip: boolean) => void;
@@ -236,6 +240,8 @@ export const usePlayerStore = create<PlayerStore>()(
       showMediaInfo: false,
       showShortcuts: false,
       controlsVisible: true,
+
+      isLocked: false,
 
       subtitles: [],
       subtitleDelay: 0,
@@ -431,6 +437,12 @@ export const usePlayerStore = create<PlayerStore>()(
           shuffledPlaylist: newShuffled ? shuffleArray(playlist) : playlist,
         });
         get().showOSD(newShuffled ? 'Shuffle: On' : 'Shuffle: Off');
+      },
+
+      toggleLock: () => {
+        const { isLocked } = get();
+        set({ isLocked: !isLocked });
+        get().showOSD(!isLocked ? 'Screen Locked' : 'Screen Unlocked');
       },
 
       setFullscreen: (fullscreen) => set({ isFullscreen: fullscreen }),
