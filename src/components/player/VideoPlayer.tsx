@@ -369,55 +369,57 @@ export function VideoPlayer() {
       />
 
       {/* Gesture Overlay for Mobile/Desktop Seeking */}
-      <div
-        className="absolute inset-0 z-10"
-        onClick={(e) => {
-          e.preventDefault();
-          const now = Date.now();
-          const timeDiff = now - lastTapTimeRef.current;
-          const rect = e.currentTarget.getBoundingClientRect();
-          const x = e.clientX - rect.left;
-          const width = rect.width;
-          const percentage = x / width;
+      {currentMedia && (
+        <div
+          className="absolute inset-0 z-10"
+          onClick={(e) => {
+            e.preventDefault();
+            const now = Date.now();
+            const timeDiff = now - lastTapTimeRef.current;
+            const rect = e.currentTarget.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const width = rect.width;
+            const percentage = x / width;
 
-          if (timeDiff < 300) {
-            // Double tap detected
-            if (tapTimeoutRef.current) {
-              clearTimeout(tapTimeoutRef.current);
-              tapTimeoutRef.current = null;
-            }
-
-            if (percentage < 0.3) {
-              // Left side double tap - Seek backward
-              if (videoRef.current) {
-                videoRef.current.currentTime = Math.max(0, videoRef.current.currentTime - 10);
-                showOSD('Rewind 10s');
+            if (timeDiff < 300) {
+              // Double tap detected
+              if (tapTimeoutRef.current) {
+                clearTimeout(tapTimeoutRef.current);
+                tapTimeoutRef.current = null;
               }
-            } else if (percentage > 0.7) {
-              // Right side double tap - Seek forward
-              if (videoRef.current) {
-                videoRef.current.currentTime = Math.min(videoRef.current.duration, videoRef.current.currentTime + 10);
-                showOSD('Forward 10s');
+
+              if (percentage < 0.3) {
+                // Left side double tap - Seek backward
+                if (videoRef.current) {
+                  videoRef.current.currentTime = Math.max(0, videoRef.current.currentTime - 10);
+                  showOSD('Rewind 10s');
+                }
+              } else if (percentage > 0.7) {
+                // Right side double tap - Seek forward
+                if (videoRef.current) {
+                  videoRef.current.currentTime = Math.min(videoRef.current.duration, videoRef.current.currentTime + 10);
+                  showOSD('Forward 10s');
+                }
+              } else {
+                // Center double tap - Toggle Fullscreen
+                toggleFullscreen();
               }
             } else {
-              // Center double tap - Toggle Fullscreen
-              toggleFullscreen();
+              // Single tap candidate
+              tapTimeoutRef.current = setTimeout(() => {
+                // Single tap anywhere toggles play, or restrict to center if desired.
+                // Taking "click in very middle just pause" literally, but assuming toggle is better.
+                togglePlay();
+                // Also show controls on interaction
+                setControlsVisible(true);
+              }, 300);
             }
-          } else {
-            // Single tap candidate
-            tapTimeoutRef.current = setTimeout(() => {
-              // Single tap anywhere toggles play, or restrict to center if desired.
-              // Taking "click in very middle just pause" literally, but assuming toggle is better.
-              togglePlay();
-              // Also show controls on interaction
-              setControlsVisible(true);
-            }, 300);
-          }
 
-          lastTapTimeRef.current = now;
-        }}
-        onDoubleClick={(e) => e.preventDefault()} // Prevent default double click behavior
-      />
+            lastTapTimeRef.current = now;
+          }}
+          onDoubleClick={(e) => e.preventDefault()} // Prevent default double click behavior
+        />
+      )}
 
       {/* Subtitles */}
       <AnimatePresence>
@@ -463,7 +465,7 @@ export function VideoPlayer() {
 
       {/* No Media Placeholder */}
       {!currentMedia && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center">
+        <div className="absolute inset-0 flex flex-col items-center justify-center z-20">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
