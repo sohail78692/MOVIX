@@ -258,7 +258,7 @@ export function Controls({ videoRef, containerRef }: ControlsProps) {
                   <button
                     onClick={playPrevious}
                     disabled={!currentMedia}
-                    className="p-2 rounded-lg hover:bg-white/10 transition-colors disabled:opacity-50 hidden md:block"
+                    className="p-2 rounded-lg hover:bg-white/10 transition-colors disabled:opacity-50 hidden sm:block"
                   >
                     <SkipBack className="w-5 h-5 text-white" />
                   </button>
@@ -269,7 +269,7 @@ export function Controls({ videoRef, containerRef }: ControlsProps) {
                   <button
                     onClick={playNext}
                     disabled={!currentMedia}
-                    className="p-2 rounded-lg hover:bg-white/10 transition-colors disabled:opacity-50 hidden md:block"
+                    className="p-2 rounded-lg hover:bg-white/10 transition-colors disabled:opacity-50 hidden sm:block"
                   >
                     <SkipForward className="w-5 h-5 text-white" />
                   </button>
@@ -277,7 +277,7 @@ export function Controls({ videoRef, containerRef }: ControlsProps) {
 
                 {/* Volume */}
                 <div
-                  className="relative items-center hidden md:flex"
+                  className="relative items-center hidden sm:flex"
                   onMouseEnter={() => {
                     if (volumeTimeoutRef.current) clearTimeout(volumeTimeoutRef.current);
                     setShowVolumeSlider(true);
@@ -339,7 +339,7 @@ export function Controls({ videoRef, containerRef }: ControlsProps) {
                   <button
                     onClick={() => { }}
                     className={cn(
-                      'p-2 rounded-lg hover:bg-white/10 transition-colors hidden md:block',
+                      'p-2 rounded-lg hover:bg-white/10 transition-colors hidden sm:block',
                       subtitles.length > 0 && 'text-primary-500'
                     )}
                   >
@@ -348,7 +348,7 @@ export function Controls({ videoRef, containerRef }: ControlsProps) {
                 </Tooltip>
 
                 {/* Speed */}
-                <div className="relative hidden md:block">
+                <div className="relative hidden sm:block">
                   <Tooltip content="Playback Speed">
                     <button
                       onClick={() => setShowSpeedMenu(!showSpeedMenu)}
@@ -392,7 +392,7 @@ export function Controls({ videoRef, containerRef }: ControlsProps) {
                   <button
                     onClick={toggleLoop}
                     className={cn(
-                      'p-2 rounded-lg hover:bg-white/10 transition-colors hidden md:block',
+                      'p-2 rounded-lg hover:bg-white/10 transition-colors hidden sm:block',
                       isLooping && 'text-primary-500'
                     )}
                   >
@@ -412,7 +412,7 @@ export function Controls({ videoRef, containerRef }: ControlsProps) {
                     onClick={toggleABLoop}
                     disabled={!currentMedia}
                     className={cn(
-                      'p-2 rounded-lg hover:bg-white/10 transition-colors disabled:opacity-50 relative hidden md:block',
+                      'p-2 rounded-lg hover:bg-white/10 transition-colors disabled:opacity-50 relative hidden sm:block',
                       isABLooping && 'text-primary-500'
                     )}
                   >
@@ -430,7 +430,7 @@ export function Controls({ videoRef, containerRef }: ControlsProps) {
                   <button
                     onClick={toggleShuffle}
                     className={cn(
-                      'p-2 rounded-lg hover:bg-white/10 transition-colors hidden md:block',
+                      'p-2 rounded-lg hover:bg-white/10 transition-colors hidden sm:block',
                       isShuffled && 'text-primary-500'
                     )}
                   >
@@ -443,7 +443,7 @@ export function Controls({ videoRef, containerRef }: ControlsProps) {
                   <button
                     onClick={togglePiP}
                     disabled={!currentMedia}
-                    className="p-2 rounded-lg hover:bg-white/10 transition-colors disabled:opacity-50 hidden md:block"
+                    className="p-2 rounded-lg hover:bg-white/10 transition-colors disabled:opacity-50 hidden sm:block"
                   >
                     <PictureInPicture2 className="w-5 h-5 text-white" />
                   </button>
@@ -454,7 +454,7 @@ export function Controls({ videoRef, containerRef }: ControlsProps) {
                   <button
                     onClick={takeScreenshot}
                     disabled={!currentMedia}
-                    className="p-2 rounded-lg hover:bg-white/10 transition-colors disabled:opacity-50 hidden md:block"
+                    className="p-2 rounded-lg hover:bg-white/10 transition-colors disabled:opacity-50 hidden sm:block"
                   >
                     <Camera className="w-5 h-5 text-white" />
                   </button>
@@ -465,7 +465,7 @@ export function Controls({ videoRef, containerRef }: ControlsProps) {
                   <button
                     onClick={() => setShowPlaylist(!showPlaylist)}
                     className={cn(
-                      'p-2 rounded-lg hover:bg-white/10 transition-colors hidden md:block',
+                      'p-2 rounded-lg hover:bg-white/10 transition-colors hidden sm:block',
                       showPlaylist && 'text-primary-500 bg-white/10'
                     )}
                   >
@@ -478,7 +478,7 @@ export function Controls({ videoRef, containerRef }: ControlsProps) {
                   <button
                     onClick={() => setShowChapters(true)}
                     className={cn(
-                      'p-2 rounded-lg hover:bg-white/10 transition-colors hidden md:block',
+                      'p-2 rounded-lg hover:bg-white/10 transition-colors hidden sm:block',
                       currentMedia && chapters.filter(c => c.fileId === currentMedia.id).length > 0 && 'text-primary-500'
                     )}
                   >
@@ -491,7 +491,7 @@ export function Controls({ videoRef, containerRef }: ControlsProps) {
                   <button
                     onClick={() => setShowEqualizer(true)}
                     className={cn(
-                      'p-2 rounded-lg hover:bg-white/10 transition-colors hidden md:block',
+                      'p-2 rounded-lg hover:bg-white/10 transition-colors hidden sm:block',
                       equalizer.enabled && 'text-primary-500'
                     )}
                   >
@@ -504,7 +504,7 @@ export function Controls({ videoRef, containerRef }: ControlsProps) {
                   <button
                     onClick={() => setShowAudioTracks(true)}
                     className={cn(
-                      'p-2 rounded-lg hover:bg-white/10 transition-colors hidden md:block',
+                      'p-2 rounded-lg hover:bg-white/10 transition-colors hidden sm:block',
                       audioTracks.length > 1 && 'text-primary-500'
                     )}
                   >
@@ -517,7 +517,7 @@ export function Controls({ videoRef, containerRef }: ControlsProps) {
                   <button
                     onClick={() => setShowSleepTimer(true)}
                     className={cn(
-                      'p-2 rounded-lg hover:bg-white/10 transition-colors hidden md:block',
+                      'p-2 rounded-lg hover:bg-white/10 transition-colors hidden sm:block',
                       sleepTimerEndTime !== null && 'text-primary-500'
                     )}
                   >
@@ -529,7 +529,7 @@ export function Controls({ videoRef, containerRef }: ControlsProps) {
                 <Tooltip content="Landscape Mode">
                   <button
                     onClick={toggleLandscape}
-                    className="p-2 rounded-lg hover:bg-white/10 transition-colors md:hidden"
+                    className="p-2 rounded-lg hover:bg-white/10 transition-colors"
                   >
                     <RotateCw className="w-5 h-5" />
                   </button>
@@ -539,7 +539,7 @@ export function Controls({ videoRef, containerRef }: ControlsProps) {
                 <Tooltip content="Lock Screen">
                   <button
                     onClick={toggleLock}
-                    className="p-2 rounded-lg hover:bg-white/10 transition-colors md:hidden"
+                    className="p-2 rounded-lg hover:bg-white/10 transition-colors"
                   >
                     <Unlock className="w-5 h-5" />
                   </button>
@@ -549,7 +549,7 @@ export function Controls({ videoRef, containerRef }: ControlsProps) {
                 <Tooltip content="Recent Files">
                   <button
                     onClick={() => setShowRecentFiles(true)}
-                    className="p-2 rounded-lg hover:bg-white/10 transition-colors hidden md:block"
+                    className="p-2 rounded-lg hover:bg-white/10 transition-colors hidden sm:block"
                   >
                     <Clock className="w-5 h-5 text-white" />
                   </button>
