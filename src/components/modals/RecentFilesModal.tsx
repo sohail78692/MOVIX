@@ -72,14 +72,15 @@ export function RecentFilesModal() {
       title="Recent Files"
       size="lg"
     >
-      <div className="w-[500px] max-h-[60vh] flex flex-col">
+      <div className="w-full max-w-lg max-h-[60vh] flex flex-col">
         {/* Header Actions */}
         {recentFiles.length > 0 && (
           <div className="flex justify-end mb-4">
             <button
               onClick={clearRecentFiles}
-              className="flex items-center gap-2 px-3 py-1.5 text-sm text-red-400
-                         hover:bg-red-500/10 rounded-lg transition-colors"
+              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-400
+                         bg-red-500/5 hover:bg-red-500/10 border border-red-500/10 
+                         rounded-lg transition-all active:scale-95"
             >
               <Trash2 className="w-4 h-4" />
               Clear History
@@ -88,11 +89,11 @@ export function RecentFilesModal() {
         )}
 
         {/* Recent Files List */}
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
           {recentFiles.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-center">
-              <Clock className="w-16 h-16 text-white/20 mb-4" />
-              <p className="text-white/60 mb-2">No recent files</p>
+              <Clock className="w-16 h-16 text-white/10 mb-4" />
+              <p className="text-white/60 mb-2 font-medium">No recent files</p>
               <p className="text-white/40 text-sm">
                 Files you play will appear here
               </p>
@@ -105,49 +106,47 @@ export function RecentFilesModal() {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.03 }}
-                  className="group flex items-center gap-3 p-3 rounded-lg
-                             bg-white/5 hover:bg-white/10 transition-colors"
+                  className="group flex items-center gap-3 p-3 rounded-xl
+                             bg-white/5 border border-white/5 hover:bg-white/10 hover:border-white/10 
+                             transition-all"
                 >
                   {/* Icon */}
-                  <div className="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center">
+                  <div className="w-12 h-12 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0">
                     {file.type === 'video' ? (
-                      <Film className="w-5 h-5 text-primary-500" />
+                      <Film className="w-6 h-6 text-primary-500" />
                     ) : (
-                      <Music className="w-5 h-5 text-primary-500" />
+                      <Music className="w-6 h-6 text-primary-500" />
                     )}
                   </div>
 
                   {/* Info */}
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-white truncate">
+                    <p className="text-sm font-medium text-white truncate mb-0.5">
                       {file.name}
                     </p>
                     <div className="flex items-center gap-2 text-xs text-white/40">
-                      <span>{formatDate(file.lastPlayed)}</span>
+                      <span className="bg-white/5 px-2 py-0.5 rounded-full">{formatDate(file.lastPlayed)}</span>
                       {file.duration > 0 && (
-                        <>
-                          <span>•</span>
-                          <span>{formatTime(file.duration)}</span>
-                        </>
+                        <span>{formatTime(file.duration)}</span>
                       )}
                     </div>
                   </div>
 
                   {/* Actions */}
-                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="flex items-center gap-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                     <button
                       onClick={() => handlePlayRecent(file)}
-                      className="p-2 rounded-lg hover:bg-primary-500/20 transition-colors"
+                      className="p-2 rounded-lg bg-primary-500/10 hover:bg-primary-500/20 text-primary-500 transition-colors"
                       title="Play"
                     >
-                      <Play className="w-4 h-4 text-primary-500" />
+                      <Play className="w-4 h-4 fill-current" />
                     </button>
                     <button
                       onClick={() => removeFromRecentFiles(file.id)}
-                      className="p-2 rounded-lg hover:bg-red-500/20 transition-colors"
+                      className="p-2 rounded-lg hover:bg-white/10 text-white/40 hover:text-red-400 transition-colors"
                       title="Remove from history"
                     >
-                      <X className="w-4 h-4 text-red-400" />
+                      <X className="w-4 h-4" />
                     </button>
                   </div>
                 </motion.div>
@@ -158,12 +157,17 @@ export function RecentFilesModal() {
 
         {/* Info Note */}
         {recentFiles.length > 0 && (
-          <div className="mt-4 p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
-            <div className="flex items-start gap-2">
-              <AlertCircle className="w-4 h-4 text-amber-500 mt-0.5 flex-shrink-0" />
-              <p className="text-xs text-amber-200/80">
-                Due to browser security, you&apos;ll need to re-select files from your device to play them again.
-              </p>
+          <div className="mt-6 p-4 rounded-xl bg-orange-900/10 border border-orange-500/10">
+            <div className="flex items-start gap-3">
+              <AlertCircle className="w-5 h-5 text-orange-500 flex-shrink-0" />
+              <div className="space-y-1">
+                <p className="text-sm font-medium text-orange-200">
+                  Authentication Required
+                </p>
+                <p className="text-xs text-orange-200/60 leading-relaxed">
+                  Due to browser security policies, you'll need to re-select this file from your device to play it again.
+                </p>
+              </div>
             </div>
           </div>
         )}
