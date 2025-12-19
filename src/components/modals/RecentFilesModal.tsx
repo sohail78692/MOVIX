@@ -165,7 +165,7 @@ export function RecentFilesModal() {
                   Authentication Required
                 </p>
                 <p className="text-xs text-orange-200/60 leading-relaxed">
-                  Due to browser security policies, you'll need to re-select this file from your device to play it again.
+                  Due to browser security policies, you&apos;ll need to re-select this file from your device to play it again.
                 </p>
               </div>
             </div>
