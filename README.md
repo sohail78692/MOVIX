@@ -5,7 +5,7 @@ A powerful, modern media player built with Next.js, featuring a sleek VLC-inspir
 ![MOVIX](https://img.shields.io/badge/MOVIX-Media%20Player-orange)
 ![Next.js](https://img.shields.io/badge/Next.js-14-black)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)
-![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4-cyan)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4-cyan) 
 
 ## Features
 
